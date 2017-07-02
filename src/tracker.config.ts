@@ -1,6 +1,8 @@
 export class TrackerConfig {
-  public name: string;
-  public port? = 9090;
-  public startServer? = true;
-  public collectDefaultMetrics? = true;
+  constructor(
+    public name: string,
+    public port: number = 9090,
+    public startServer: boolean = true,
+    public collectDefaultMetrics: boolean = true,
+  ) {}
 }

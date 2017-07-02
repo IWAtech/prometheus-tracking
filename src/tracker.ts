@@ -31,7 +31,12 @@ export class Tracker {
   }
 
   public static getInstance(config: TrackerConfig) {
-    return new Tracker(config);
+    return new Tracker(new TrackerConfig(
+      config.name,
+      config.port,
+      config.startServer,
+      config.collectDefaultMetrics,
+    ));
   }
 
   private constructor(private config: TrackerConfig) {
