@@ -38,12 +38,12 @@ export class Tracker {
     this.responseTime = this.createHistogram(
       'http_response_time_seconds',
       'Response time histogram',
-      ['name', 'uri', 'method', 'status'],
+      ['name', 'url', 'method', 'code'],
     );
     this.requestCounter = this.createCounter(
       'http_request_counter',
       'Counter of all requests',
-      ['name', 'uri', 'method', 'status'],
+      ['name', 'url', 'method', 'code'],
     );
 
     if (config.collectDefaultMetrics) {
@@ -60,9 +60,16 @@ export class Tracker {
     }
   }
 
-  public trackRequest(uri: string, method: string, status: number, seconds: number) {
-    this.responseTime.labels(this.config.name, uri, method, status.toString()).observe(seconds);
-    this.requestCounter.labels(this.config.name, uri, method, status.toString()).inc();
+  /**
+   * track a single request: tracks response time and request count including labels with request properties
+   * @param url URL that should be tracked (format like "/blog/2017")
+   * @param method request method (eg GET, POST, ...)
+   * @param code response HTTP status code (eg. 200)
+   * @param seconds response time of this particular request
+   */
+  public trackRequest(url: string, method: string, code: number, seconds: number) {
+    this.responseTime.labels(this.config.name, url, method, code.toString()).observe(seconds);
+    this.requestCounter.labels(this.config.name, url, method, code.toString()).inc();
   }
 
   /**
