@@ -1,21 +1,15 @@
 import * as http from 'http';
 import * as client from 'prom-client';
+import { Counter } from './tracker.counter';
+import { Gauge } from './tracker.gauge';
+import { Histogram } from './tracker.historgram';
 
 const NS_PER_SEC = 1000000000;
 
 export class Tracker {
 
-  private responseTime = new client.Histogram({
-    name: 'response_time_histogram',
-    help: 'Response time histogram',
-    labelNames: ['name', 'uri', 'method', 'status'],
-  });
-
-  private requestCounter = new client.Counter({
-    name: 'request_counter',
-    help: 'Counter of all requests',
-    labelNames: ['name', 'uri', 'method', 'status'],
-  });
+  private responseTime: Histogram;
+  private requestCounter: Counter;
 
   public static toFloat(timeTuple: [number, number]) {
     return timeTuple[0] + timeTuple[1] / NS_PER_SEC;
@@ -40,6 +34,17 @@ export class Tracker {
   }
 
   private constructor(private name: string, port: number, collectDefaultMetrics: boolean) {
+    this.responseTime = this.createHistogram(
+      'response_time_histogram',
+      'Response time histogram',
+      ['name', 'uri', 'method', 'status'],
+    );
+    this.requestCounter = this.createCounter(
+      'request_counter',
+      'Counter of all requests',
+      ['name', 'uri', 'method', 'status'],
+    );
+
     if (collectDefaultMetrics) {
       // Probe every 5th second.
       client.collectDefaultMetrics(5000);
@@ -52,9 +57,51 @@ export class Tracker {
     }).listen(port);
   }
 
-  public trackResponseTime(uri: string, method: string, status: number, seconds: number) {
+  public trackRequest(uri: string, method: string, status: number, seconds: number) {
     this.responseTime.labels(this.name, uri, method, status.toString()).observe(seconds);
     this.requestCounter.labels(this.name, uri, method, status.toString()).inc();
+  }
+
+  /**
+   * creates a new counter metric
+   * @param name name of the counter (used as metric key)
+   * @param description helpful description for the metric
+   * @param labels define a list of labels for this metric
+   */
+  public createCounter(name: string, description: string, labels: string[]): Counter {
+    return new Counter(
+      name,
+      description,
+      labels,
+    );
+  }
+
+  /**
+   * creates a new gauge metric
+   * @param name name of the gauge (used as metric key)
+   * @param description helpful description for the metric
+   * @param labels define a list of labels for this metric
+   */
+  public createGauge(name: string, description: string, labels: string[]): Gauge {
+    return new Gauge(
+      name,
+      description,
+      labels,
+    );
+  }
+
+  /**
+   * creates a new histogram metric
+   * @param name name of the histogram (used as metric key)
+   * @param description helpful description for the metric
+   * @param labels define a list of labels for this metric
+   */
+  public createHistogram(name: string, description: string, labels: string[]): Histogram {
+    return new Histogram(
+      name,
+      description,
+      labels,
+    );
   }
 
   public getMetrics(): any {
