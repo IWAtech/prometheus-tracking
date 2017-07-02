@@ -1,5 +1,28 @@
 import * as client from 'prom-client';
 
+export interface IGauge {
+  /**
+   * Increment with value
+   * @param value The value to increment with
+   * @param timestamp Timestamp to associate the time series with
+   */
+  inc(value?: number, timestamp?: number|Date): void;
+
+  /**
+   * Decrement with value
+   * @param value The value to decrement with
+   * @param timestamp Timestamp to associate the time series with
+   */
+  dec(value?: number, timestamp?: number|Date): void;
+
+  /**
+   * Set gauge value
+   * @param value The value to set
+   * @param timestamp Timestamp to associate the time series with
+   */
+  set(value?: number, timestamp?: number|Date): void;
+}
+
 export class Gauge {
   private gauge: client.Gauge;
   constructor(name: string, description: string, labels: string[]) {
@@ -42,8 +65,7 @@ export class Gauge {
    * @param values Label values
    * @return Configured gauge with given labels
    */
-  public labels(...values: string[]): Gauge {
-    this.gauge.labels(...values);
-    return this;
+  public labels(...values: string[]): IGauge {
+    return this.gauge.labels(...values);
   }
 }

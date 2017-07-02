@@ -1,5 +1,13 @@
 import * as client from 'prom-client';
 
+export interface IHistogram {
+  /**
+   * Observe value
+   * @param value The value to observe
+   */
+  observe(value: number): void;
+}
+
 export class Histogram {
   private histogram: client.Histogram;
   constructor(name: string, description: string, labels: string[]) {
@@ -23,9 +31,8 @@ export class Histogram {
    * @param values Label values
    * @return Configured counter with given labels
    */
-  public labels(...values: string[]): Histogram {
-    this.histogram.labels(...values);
-    return this;
+  public labels(...values: string[]): IHistogram {
+    return this.histogram.labels(...values);
   }
 
   /**
