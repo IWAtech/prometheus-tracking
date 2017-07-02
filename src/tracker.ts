@@ -35,12 +35,12 @@ export class Tracker {
 
   private constructor(private name: string, port: number, collectDefaultMetrics: boolean) {
     this.responseTime = this.createHistogram(
-      'response_time_histogram',
+      'http_response_time_seconds',
       'Response time histogram',
       ['name', 'uri', 'method', 'status'],
     );
     this.requestCounter = this.createCounter(
-      'request_counter',
+      'http_request_counter',
       'Counter of all requests',
       ['name', 'uri', 'method', 'status'],
     );
