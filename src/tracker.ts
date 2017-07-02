@@ -1,5 +1,6 @@
 import * as http from 'http';
 import * as client from 'prom-client';
+import { TrackerConfig } from './tracker.config';
 import { Counter } from './tracker.counter';
 import { Gauge } from './tracker.gauge';
 import { Histogram } from './tracker.historgram';
@@ -29,11 +30,11 @@ export class Tracker {
     return Tracker.toFloat(total);
   }
 
-  public static getInstance(name: string, port: number = 9090, collectDefaultMetrics: boolean = true) {
-    return new Tracker(name, port, collectDefaultMetrics);
+  public static getInstance(config?: TrackerConfig) {
+    return new Tracker(config || new TrackerConfig());
   }
 
-  private constructor(private name: string, port: number, collectDefaultMetrics: boolean) {
+  private constructor(private config: TrackerConfig) {
     this.responseTime = this.createHistogram(
       'http_response_time_seconds',
       'Response time histogram',
@@ -45,21 +46,23 @@ export class Tracker {
       ['name', 'uri', 'method', 'status'],
     );
 
-    if (collectDefaultMetrics) {
+    if (config.collectDefaultMetrics) {
       // Probe every 5th second.
       client.collectDefaultMetrics(5000);
     }
 
-    http.createServer((request, response) => {
-      response.setHeader('Connection', 'close');
-      response.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      response.end(this.getMetrics());
-    }).listen(port);
+    if (config.startServer) {
+      http.createServer((request, response) => {
+        response.setHeader('Connection', 'close');
+        response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        response.end(this.getMetrics());
+      }).listen(config.port);
+    }
   }
 
   public trackRequest(uri: string, method: string, status: number, seconds: number) {
-    this.responseTime.labels(this.name, uri, method, status.toString()).observe(seconds);
-    this.requestCounter.labels(this.name, uri, method, status.toString()).inc();
+    this.responseTime.labels(this.config.name, uri, method, status.toString()).observe(seconds);
+    this.requestCounter.labels(this.config.name, uri, method, status.toString()).inc();
   }
 
   /**
@@ -104,7 +107,7 @@ export class Tracker {
     );
   }
 
-  public getMetrics(): any {
+  public getMetrics(): string {
     return client.register.metrics();
   }
 }
