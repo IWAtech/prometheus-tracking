@@ -30,8 +30,8 @@ export class Tracker {
     return Tracker.toFloat(total);
   }
 
-  public static getInstance(config?: TrackerConfig) {
-    return new Tracker(config || new TrackerConfig());
+  public static getInstance(config: TrackerConfig) {
+    return new Tracker(config);
   }
 
   private constructor(private config: TrackerConfig) {
