@@ -1,3 +1,10 @@
+export interface ITrackerConfig {
+  name: string;
+  port?: number;
+  startServer?: boolean;
+  collectDefaultMetrics?: boolean;
+}
+
 export class TrackerConfig {
   constructor(
     public name: string,
