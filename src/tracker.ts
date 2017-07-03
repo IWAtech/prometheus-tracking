@@ -1,6 +1,6 @@
 import * as http from 'http';
 import * as client from 'prom-client';
-import { TrackerConfig } from './tracker.config';
+import { ITrackerConfig, TrackerConfig } from './tracker.config';
 import { Counter } from './tracker.counter';
 import { Gauge } from './tracker.gauge';
 import { Histogram } from './tracker.historgram';
@@ -29,7 +29,7 @@ export class Tracker {
     return Tracker.toFloat(total);
   }
 
-  public static getInstance(config: TrackerConfig) {
+  public static getInstance(config: ITrackerConfig) {
     return new Tracker(new TrackerConfig(
       config.name,
       config.port,
