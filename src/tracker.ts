@@ -10,7 +10,6 @@ const NS_PER_SEC = 1000000000;
 export class Tracker {
 
   private responseTime: Histogram;
-  private requestCounter: Counter;
 
   public static toFloat(timeTuple: [number, number]) {
     return timeTuple[0] + timeTuple[1] / NS_PER_SEC;
@@ -45,11 +44,6 @@ export class Tracker {
       'Response time histogram',
       ['name', 'url', 'method', 'code'],
     );
-    this.requestCounter = this.createCounter(
-      'http_request_counter',
-      'Counter of all requests',
-      ['name', 'url', 'method', 'code'],
-    );
 
     if (config.collectDefaultMetrics) {
       // Probe every 5th second.
@@ -74,7 +68,6 @@ export class Tracker {
    */
   public trackRequest(url: string, method: string, code: number, seconds: number) {
     this.responseTime.labels(this.config.name, url, method, code.toString()).observe(seconds);
-    this.requestCounter.labels(this.config.name, url, method, code.toString()).inc();
   }
 
   /**
